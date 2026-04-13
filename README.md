@@ -17,57 +17,98 @@ If you are developing a production application, we recommend updating the config
 
 ```js
 export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+  # FlowSync
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+  Landing page SaaS conçue comme une vitrine portfolio pour un produit de collaboration de projets en temps réel.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+  Le projet est construit avec React, TypeScript, Vite et Tailwind CSS. Il propose un contenu en français par défaut, un mode sombre, des animations discrètes et un déploiement prêt pour GitHub Pages.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+  ## Aperçu
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+  FlowSync présente :
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+  - une hero section avec illustration personnalisée
+  - une grille de fonctionnalités orientée produit
+  - une section expliquant le workflow
+  - un aperçu de dashboard
+  - des tarifs
+  - des témoignages
+  - un appel à l’action clair
+  - un footer avec liens et indicateurs de projet
+
+  ## Stack technique
+
+  - React 19
+  - TypeScript
+  - Vite 8
+  - Tailwind CSS 4
+  - Framer Motion
+  - Lucide React
+
+  ## Fonctionnalités
+
+  - Mode clair / sombre avec toggle dans le header
+  - Interface responsive pensée mobile-first
+  - Styles entièrement gérés avec Tailwind CSS
+  - Animations légères pour les sections et les cartes
+  - Branding et contenu en français
+  - Préparation GitHub Pages avec base Vite configurée
+
+  ## Installation
+
+  ```bash
+  pnpm install
+  ```
+
+  ## Scripts disponibles
+
+  ```bash
+  pnpm dev
+  pnpm build
+  pnpm lint
+  pnpm preview
+  ```
+
+  - `pnpm dev` lance le serveur de développement
+  - `pnpm build` génère la version de production
+  - `pnpm lint` vérifie la qualité du code
+  - `pnpm preview` sert localement le build de production
+
+  ## Développement local
+
+  ```bash
+  pnpm dev
+  ```
+
+  Le site est ensuite disponible en local via l’URL affichée par Vite.
+
+  ## Déploiement GitHub Pages
+
+  Le projet est configuré pour GitHub Pages avec :
+
+  - `base` défini dans [vite.config.ts](vite.config.ts)
+  - un workflow de déploiement dans [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
+
+  Le déploiement se déclenche automatiquement à chaque push sur `main`.
+
+  ## Structure utile
+
+  - [src/App.tsx](src/App.tsx) : point d’entrée React
+  - [src/FlowSyncLanding.tsx](src/FlowSyncLanding.tsx) : page principale
+  - [src/index.css](src/index.css) : base Tailwind et tokens globaux
+  - [src/assets/hero-flowsync.svg](src/assets/hero-flowsync.svg) : illustration hero
+  - [vite.config.ts](vite.config.ts) : config Vite et base Pages
+
+  ## Notes de conception
+
+  - Palette principale inspirée de `#E63946`, `#F1FAEE`, `#A8DADC`, `#457B9D` et `#1D3557`
+  - Direction visuelle lumineuse avec surfaces claires et contrastes nets
+  - Pas de dégradés sur les textes, boutons et icônes
+  - Interface pensée pour une lecture rapide et une présentation portfolio
+
+  ## Vérification
+
+  Le projet a été validé avec :
+
+  - `pnpm build`
+  - `pnpm lint`
