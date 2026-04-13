@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { AnimatePresence, motion, useReducedMotion, type Variants } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import {
@@ -14,10 +14,12 @@ import {
   MessageSquareText,
   Menu,
   MonitorSmartphone,
+  Moon,
   Rocket,
   ShieldCheck,
   Sparkles,
   Star,
+  Sun,
   TimerReset,
   Users,
   Workflow,
@@ -25,7 +27,6 @@ import {
   Zap,
 } from 'lucide-react'
 import heroImage from './assets/hero-flowsync.svg'
-import './FlowSyncLanding.css'
 
 type FeatureItem = {
   title: string
@@ -65,6 +66,7 @@ type SectionHeadingProps = {
   title: string
   description: string
   align?: 'left' | 'center'
+  tone?: 'default' | 'light'
 }
 
 const navLinks = [
@@ -234,24 +236,73 @@ const supportLinks = [
 const socialLinks = [
   { href: 'https://www.linkedin.com/', label: 'LinkedIn' },
   { href: 'https://x.com/', label: 'X' },
-  { href: 'https://github.com/', label: 'GitHub' },
+  { href: 'https://github.com/AxelDoussoux/Landing-project-1', label: 'GitHub' },
 ]
 
-function SectionHeading({ eyebrow, title, description, align = 'left' }: SectionHeadingProps) {
+const containerClass = 'mx-auto w-full max-w-7xl px-6 lg:px-8'
+const sectionClass = 'py-20 sm:py-24 lg:py-28'
+const surfaceClass =
+  'rounded-[28px] border border-flowsync-border/70 bg-flowsync-surface/85 shadow-[0_24px_60px_rgba(29,53,87,0.10)] backdrop-blur-xl transition-colors duration-300 dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/80 dark:shadow-[0_24px_60px_rgba(6,12,24,0.35)]'
+const heroSurfaceClass =
+  'rounded-[32px] border border-flowsync-border/70 bg-flowsync-surface/85 p-4 shadow-[0_32px_80px_rgba(29,53,87,0.16)] backdrop-blur-xl transition-colors duration-300 dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/80 dark:shadow-[0_32px_80px_rgba(6,12,24,0.45)]'
+const buttonBase =
+  'inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flowsync-accent focus-visible:ring-offset-2 focus-visible:ring-offset-flowsync-bg dark:focus-visible:ring-offset-flowsync-bg-dark'
+const buttonPrimary = `${buttonBase} bg-flowsync-accent text-white shadow-[0_18px_40px_rgba(69,123,157,0.28)] hover:-translate-y-0.5 hover:bg-[#36627e]`
+const buttonSecondary = `${buttonBase} border border-flowsync-border/70 bg-flowsync-surface/80 text-flowsync-text hover:-translate-y-0.5 hover:bg-flowsync-accent-soft/25 dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/75 dark:text-flowsync-text-dark dark:hover:bg-flowsync-accent-soft/10`
+const buttonInverted = `${buttonBase} bg-white text-flowsync-text shadow-[0_18px_40px_rgba(255,255,255,0.18)] hover:-translate-y-0.5 hover:bg-flowsync-bg`
+const buttonOnDark = `${buttonBase} border border-white/20 bg-white/10 text-white hover:-translate-y-0.5 hover:bg-white/15`
+const iconButton =
+  'inline-flex h-11 w-11 items-center justify-center rounded-full border border-flowsync-border/70 bg-flowsync-surface/80 text-flowsync-text shadow-sm transition hover:-translate-y-0.5 hover:bg-flowsync-accent/10 dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/80 dark:text-flowsync-text-dark dark:hover:bg-white/10'
+const navLinkClass =
+  'text-sm font-medium text-flowsync-text/75 transition hover:text-flowsync-accent dark:text-flowsync-text-dark/75 dark:hover:text-flowsync-accent-soft'
+const eyebrowClass =
+  'inline-flex items-center gap-2 rounded-full border border-flowsync-border/70 bg-flowsync-surface/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-accent dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/70 dark:text-flowsync-accent-soft'
+const eyebrowLightClass =
+  'inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white'
+
+function SectionHeading({ eyebrow, title, description, align = 'left', tone = 'default' }: SectionHeadingProps) {
   return (
-    <div className={`section-heading section-heading--${align}`}>
-      <span className="eyebrow">{eyebrow}</span>
-      <h2>{title}</h2>
-      <p>{description}</p>
+    <div className={`${align === 'center' ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl'} space-y-5`}>
+      <span className={tone === 'light' ? eyebrowLightClass : eyebrowClass}>{eyebrow}</span>
+      <h2 className="font-display text-3xl font-bold tracking-tight text-flowsync-text sm:text-4xl lg:text-5xl dark:text-flowsync-text-dark">
+        {title}
+      </h2>
+      <p className="text-base leading-7 text-flowsync-text/75 dark:text-flowsync-text-dark/75">{description}</p>
     </div>
   )
 }
 
 export function FlowSyncLanding() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') {
+      return 'light'
+    }
+
+    const storedTheme = window.localStorage.getItem('flowsync-theme')
+
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      return storedTheme
+    }
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
   const reduceMotion = useReducedMotion() ?? false
   const easeOut: [number, number, number, number] = [0.16, 1, 0.3, 1]
   const viewport = { once: true, amount: 0.22 }
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('dark', theme === 'dark')
+    root.style.colorScheme = theme
+    window.localStorage.setItem('flowsync-theme', theme)
+
+    const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+
+    if (themeMeta) {
+      themeMeta.content = theme === 'dark' ? '#08111d' : '#f1faee'
+    }
+  }, [theme])
 
   const sectionVariants: Variants = {
     hidden: { opacity: 0, y: 28 },
@@ -314,68 +365,86 @@ export function FlowSyncLanding() {
         variants: staggerVariants,
       }
 
+  const themeLabel = theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'
+
   return (
-    <div className="page-shell" id="top">
-      <div className="page-bg" aria-hidden="true">
-        <span className="page-bg__orb page-bg__orb--one" />
-        <span className="page-bg__orb page-bg__orb--two" />
-        <span className="page-bg__grid" />
+    <div className="relative min-h-screen overflow-x-hidden bg-flowsync-bg text-flowsync-text transition-colors duration-300 dark:bg-flowsync-bg-dark dark:text-flowsync-text-dark" id="top">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+        <span className="absolute left-1/2 top-[-8rem] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-flowsync-accent-soft/30 blur-3xl dark:bg-flowsync-accent-soft/10" />
+        <span className="absolute right-[-8rem] top-40 h-[24rem] w-[24rem] rounded-full bg-flowsync-accent/20 blur-3xl dark:bg-flowsync-accent/10" />
+        <span className="absolute bottom-[-10rem] left-[-8rem] h-[26rem] w-[26rem] rounded-full bg-flowsync-accent-strong/10 blur-3xl dark:bg-flowsync-accent-strong/5" />
       </div>
 
-      <header className="site-header">
-        <div className="container header-inner">
-          <a className="brand" href="#top" aria-label="Accueil FlowSync">
-            <span className="brand-mark" aria-hidden="true">
-              <Sparkles size={16} />
-            </span>
-            <span className="brand-copy">
-              <strong>FlowSync</strong>
-              <small>Gestion de projets en temps réel</small>
-            </span>
-          </a>
-
-          <nav className="site-nav" aria-label="Navigation principale">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href}>
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          <div className="header-actions">
-            <a className="button button--ghost header-cta" href="#preview">
-              Voir l’aperçu
+      <header className="sticky top-0 z-40 border-b border-flowsync-border/30 bg-flowsync-bg/80 backdrop-blur-xl dark:border-flowsync-border-dark/30 dark:bg-flowsync-bg-dark/80">
+        <div className={containerClass}>
+          <div className="flex h-20 items-center justify-between gap-4">
+            <a className="flex items-center gap-3 rounded-full" href="#top" aria-label="Accueil FlowSync">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-flowsync-accent text-white shadow-[0_18px_40px_rgba(69,123,157,0.28)]">
+                <Sparkles size={16} />
+              </span>
+              <span className="hidden flex-col leading-tight sm:flex">
+                <strong className="font-display text-lg text-flowsync-text dark:text-flowsync-text-dark">FlowSync</strong>
+                <small className="text-xs font-medium uppercase tracking-[0.24em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                  Gestion de projets en temps réel
+                </small>
+              </span>
             </a>
-            <a className="button button--primary header-cta" href="#cta">
-              Essai gratuit
-            </a>
-            <button
-              className="menu-button"
-              type="button"
-              aria-label={menuOpen ? 'Fermer le menu de navigation' : 'Ouvrir le menu de navigation'}
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((value) => !value)}
-            >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+
+            <nav className="hidden items-center gap-8 lg:flex" aria-label="Navigation principale">
+              {navLinks.map((link) => (
+                <a key={link.href} className={navLinkClass} href={link.href}>
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-3">
+              <button
+                className={iconButton}
+                type="button"
+                aria-label={themeLabel}
+                onClick={() => setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))}
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+
+              <div className="hidden items-center gap-3 md:flex">
+                <a className={buttonSecondary} href="#preview">
+                  Voir l’aperçu
+                </a>
+                <a className={buttonPrimary} href="#cta">
+                  Essai gratuit
+                </a>
+              </div>
+
+              <button
+                className={`${iconButton} md:hidden`}
+                type="button"
+                aria-label={menuOpen ? 'Fermer le menu de navigation' : 'Ouvrir le menu de navigation'}
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((value) => !value)}
+              >
+                {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
           </div>
         </div>
 
         <AnimatePresence>
           {menuOpen && (
             <motion.div
-              className="mobile-menu"
+              className="border-t border-flowsync-border/30 bg-flowsync-bg/95 backdrop-blur-xl dark:border-flowsync-border-dark/30 dark:bg-flowsync-bg-dark/95 md:hidden"
               initial={reduceMotion ? false : { opacity: 0, y: -12 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -12 }}
               transition={{ duration: reduceMotion ? 0 : 0.25, ease: easeOut }}
             >
-              <div className="container mobile-menu__inner">
-                <div className="mobile-menu__links">
+              <div className={`${containerClass} space-y-5 py-6`}>
+                <div className="grid gap-3">
                   {navLinks.map((link) => (
                     <a
                       key={link.href}
-                      className="mobile-menu__link"
+                      className="rounded-2xl border border-flowsync-border/40 bg-flowsync-surface/80 px-4 py-3 text-sm font-medium text-flowsync-text transition hover:border-flowsync-accent/40 hover:bg-flowsync-accent/10 dark:border-flowsync-border-dark/40 dark:bg-flowsync-surface-dark/75 dark:text-flowsync-text-dark dark:hover:bg-white/5"
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
                     >
@@ -384,11 +453,11 @@ export function FlowSyncLanding() {
                   ))}
                 </div>
 
-                <div className="mobile-menu__actions">
-                  <a className="button button--secondary" href="#preview" onClick={() => setMenuOpen(false)}>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <a className={buttonSecondary} href="#preview" onClick={() => setMenuOpen(false)}>
                     Voir l’aperçu
                   </a>
-                  <a className="button button--primary" href="#cta" onClick={() => setMenuOpen(false)}>
+                  <a className={buttonPrimary} href="#cta" onClick={() => setMenuOpen(false)}>
                     Essai gratuit
                   </a>
                 </div>
@@ -399,103 +468,137 @@ export function FlowSyncLanding() {
       </header>
 
       <main>
-        <section className="hero-section">
-          <div className="container hero-grid">
-            <motion.div className="hero-copy" {...heroMotion}>
-              <span className="eyebrow">SaaS en temps réel pour équipes modernes</span>
-              <h1>
-                Travaillez plus vite.
-                <span>Collaborez mieux.</span>
-              </h1>
-              <p>
-                FlowSync est un espace de travail élégant qui réunit planification, exécution et reporting dans un flux
-                unique, calme et temps réel.
-              </p>
+        <section className="pb-16 pt-10 sm:pb-20 lg:pb-28 lg:pt-16">
+          <div className={containerClass}>
+            <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+              <motion.div className="space-y-8" {...heroMotion}>
+                <span className={eyebrowClass}>SaaS en temps réel pour équipes modernes</span>
+                <h1 className="max-w-2xl font-display text-5xl font-bold tracking-tight text-flowsync-text sm:text-6xl lg:text-7xl dark:text-flowsync-text-dark">
+                  Travaillez plus vite.
+                  <span className="mt-3 block text-flowsync-accent">Collaborez mieux.</span>
+                </h1>
+                <p className="max-w-xl text-lg leading-8 text-flowsync-text/75 dark:text-flowsync-text-dark/75">
+                  FlowSync est un espace de travail élégant qui réunit planification, exécution et reporting dans un
+                  flux unique, calme et temps réel.
+                </p>
 
-              <div className="hero-actions">
-                <a className="button button--primary button--large" href="#pricing">
-                  Essai gratuit <ArrowRight size={18} />
-                </a>
-                <a className="button button--secondary button--large" href="#workflow">
-                  Voir la démo <MonitorSmartphone size={18} />
-                </a>
-              </div>
+                <div className="flex flex-wrap gap-3">
+                  <a className={buttonPrimary} href="#pricing">
+                    Essai gratuit <ArrowRight size={18} />
+                  </a>
+                  <a className={buttonSecondary} href="#workflow">
+                    Voir la démo <MonitorSmartphone size={18} />
+                  </a>
+                </div>
 
-              <div className="hero-metrics">
-                {heroMetrics.map((metric) => (
-                  <div key={metric.label} className="metric-card">
-                    <strong>{metric.value}</strong>
-                    <span>{metric.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="hero-trust">
-                <div className="hero-trust__avatars" aria-hidden="true">
-                  {heroAvatars.map((avatar, index) => (
-                    <span
-                      key={avatar.initials}
-                      className={`hero-trust__avatar hero-trust__avatar--${index + 1}`}
-                      style={{ background: avatar.background } as CSSProperties}
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {heroMetrics.map((metric) => (
+                    <div
+                      key={metric.label}
+                      className="rounded-2xl border border-flowsync-border/70 bg-flowsync-surface/85 p-4 shadow-sm dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/70"
                     >
-                      {avatar.initials}
-                    </span>
+                      <strong className="block text-2xl font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                        {metric.value}
+                      </strong>
+                      <span className="mt-1 block text-sm text-flowsync-text/70 dark:text-flowsync-text-dark/70">
+                        {metric.label}
+                      </span>
+                    </div>
                   ))}
                 </div>
-                <p>Conçu pour les équipes produit, design et ingénierie qui veulent tout comprendre en un coup d’œil.</p>
-              </div>
-            </motion.div>
 
-            <motion.div className="hero-visual" {...heroMotion}>
-              <div className="hero-visual__halo" aria-hidden="true" />
-              <div className="hero-visual__surface">
-                <div className="hero-visual__window" aria-hidden="true">
-                  <span />
-                  <span />
-                  <span />
-                  <strong>Espace en direct</strong>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <div className="flex -space-x-3" aria-hidden="true">
+                    {heroAvatars.map((avatar) => (
+                      <span
+                        key={avatar.initials}
+                        className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-flowsync-bg text-xs font-bold text-white shadow-md dark:border-flowsync-bg-dark"
+                        style={{ background: avatar.background } as CSSProperties}
+                      >
+                        {avatar.initials}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="max-w-md text-sm leading-6 text-flowsync-text/70 dark:text-flowsync-text-dark/70">
+                    Conçu pour les équipes produit, design et ingénierie qui veulent tout comprendre en un coup d’œil.
+                  </p>
                 </div>
-                <div className="hero-visual__content">
-                  <div className="hero-visual__badge">
-                    <Clock3 size={16} />
-                    Sync en 0,8 s
-                  </div>
-                  <div className="hero-visual__card">
-                    <img
-                      src={heroImage}
-                      alt="Illustration du produit FlowSync montrant des cartes de projet superposées"
-                      className="hero-visual__image"
-                    />
-                  </div>
-                  <div className="floating-card floating-card--left">
-                    <Sparkles size={18} />
-                    <div>
-                      <strong>3 automatisations actives</strong>
-                      <span>Routage et rappels activés</span>
+              </motion.div>
+
+              <motion.div className="relative" {...heroMotion}>
+                <div className="absolute inset-0 -z-10 rounded-[40px] bg-flowsync-accent-soft/15 blur-3xl dark:bg-flowsync-accent-soft/10" />
+                <div className={heroSurfaceClass}>
+                  <div className="flex items-center justify-between gap-4 border-b border-flowsync-border/20 pb-4 dark:border-flowsync-border-dark/20">
+                    <div className="flex items-center gap-2">
+                      <span className="h-3 w-3 rounded-full bg-flowsync-accent-strong" />
+                      <span className="h-3 w-3 rounded-full bg-flowsync-accent-soft" />
+                      <span className="h-3 w-3 rounded-full bg-flowsync-accent" />
+                    </div>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-flowsync-accent/10 px-3 py-1 text-xs font-semibold text-flowsync-accent dark:bg-white/10 dark:text-flowsync-text-dark">
+                      <Clock3 size={14} />
+                      Espace en direct
                     </div>
                   </div>
-                  <div className="floating-card floating-card--right">
-                    <Users size={18} />
-                    <div>
-                      <strong>12 coéquipiers connectés</strong>
-                      <span>Collaboration en temps réel</span>
+
+                  <div className="relative mx-auto max-w-[34rem] pt-6 pb-12">
+                    <div className="rounded-[28px] border border-flowsync-border/15 bg-white/70 p-4 shadow-[0_24px_60px_rgba(29,53,87,0.12)] dark:border-flowsync-border-dark/20 dark:bg-[#101b2d]/85">
+                      <img
+                        src={heroImage}
+                        alt="Illustration du produit FlowSync montrant des cartes de projet superposées"
+                        className="w-full rounded-[22px]"
+                      />
                     </div>
-                  </div>
-                  <div className="floating-card floating-card--bottom">
-                    <BarChart3 size={18} />
-                    <div>
-                      <strong>Santé projet +18 %</strong>
-                      <span>La vélocité monte</span>
+
+                    <div className="absolute left-0 top-8 hidden w-56 -translate-x-4 rounded-2xl border border-flowsync-border/20 bg-flowsync-surface/90 p-4 shadow-lg backdrop-blur-xl lg:block dark:border-flowsync-border-dark/20 dark:bg-flowsync-surface-dark/90">
+                      <div className="flex items-start gap-3">
+                        <Sparkles size={18} className="mt-0.5 text-flowsync-accent" />
+                        <div>
+                          <strong className="block text-sm text-flowsync-text dark:text-flowsync-text-dark">
+                            3 automatisations actives
+                          </strong>
+                          <span className="mt-1 block text-xs text-flowsync-text/70 dark:text-flowsync-text-dark/70">
+                            Routage et rappels activés
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="absolute right-0 top-28 hidden w-56 translate-x-4 rounded-2xl border border-flowsync-border/20 bg-flowsync-surface/90 p-4 shadow-lg backdrop-blur-xl xl:block dark:border-flowsync-border-dark/20 dark:bg-flowsync-surface-dark/90">
+                      <div className="flex items-start gap-3">
+                        <Users size={18} className="mt-0.5 text-flowsync-accent" />
+                        <div>
+                          <strong className="block text-sm text-flowsync-text dark:text-flowsync-text-dark">
+                            12 coéquipiers connectés
+                          </strong>
+                          <span className="mt-1 block text-xs text-flowsync-text/70 dark:text-flowsync-text-dark/70">
+                            Collaboration en temps réel
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-0 left-10 hidden w-56 -translate-y-2 rounded-2xl border border-flowsync-border/20 bg-flowsync-surface/90 p-4 shadow-lg backdrop-blur-xl lg:block dark:border-flowsync-border-dark/20 dark:bg-flowsync-surface-dark/90">
+                      <div className="flex items-start gap-3">
+                        <BarChart3 size={18} className="mt-0.5 text-flowsync-accent" />
+                        <div>
+                          <strong className="block text-sm text-flowsync-text dark:text-flowsync-text-dark">
+                            Santé projet +18 %
+                          </strong>
+                          <span className="mt-1 block text-xs text-flowsync-text/70 dark:text-flowsync-text-dark/70">
+                            La vélocité monte
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </div>
         </section>
 
-        <motion.section className="section" {...sectionMotionProps} id="features">
-          <div className="container">
+        <motion.section className={sectionClass} {...sectionMotionProps} id="features">
+          <div className={containerClass}>
             <SectionHeading
               eyebrow="Valeur produit"
               title="Pensé pour garder les équipes alignées sans les ralentir"
@@ -503,25 +606,31 @@ export function FlowSyncLanding() {
               align="center"
             />
 
-            <motion.div className="feature-grid" {...containerMotionProps}>
+            <motion.div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-3" {...containerMotionProps}>
               {features.map((feature) => {
                 const FeatureIcon = feature.icon
 
                 return (
                   <motion.article
                     key={feature.title}
-                    className="feature-card"
+                    className="group h-full rounded-[24px] border border-flowsync-border/70 bg-flowsync-surface/80 p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-flowsync-accent/40 hover:shadow-[0_20px_50px_rgba(29,53,87,0.10)] dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/75 dark:hover:border-flowsync-accent-soft/40 dark:hover:shadow-[0_20px_50px_rgba(6,12,24,0.35)]"
                     variants={itemVariants}
                     whileHover={hoverLift}
                     transition={{ duration: reduceMotion ? 0 : 0.25, ease: easeOut }}
                   >
-                    <div className="feature-card__icon" aria-hidden="true">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-flowsync-accent/10 text-flowsync-accent dark:bg-flowsync-accent/15">
                       <FeatureIcon size={20} />
                     </div>
-                    <div className="feature-card__body">
-                      <p className="feature-card__metric">{feature.metric}</p>
-                      <h3>{feature.title}</h3>
-                      <p>{feature.description}</p>
+                    <div className="mt-5 space-y-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-flowsync-accent/80 dark:text-flowsync-accent-soft/80">
+                        {feature.metric}
+                      </p>
+                      <h3 className="font-display text-xl font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                        {feature.title}
+                      </h3>
+                      <p className="text-sm leading-7 text-flowsync-text/72 dark:text-flowsync-text-dark/72">
+                        {feature.description}
+                      </p>
                     </div>
                   </motion.article>
                 )
@@ -530,108 +639,127 @@ export function FlowSyncLanding() {
           </div>
         </motion.section>
 
-        <motion.section className="section section--split" {...sectionMotionProps} id="workflow">
-          <div className="container split-grid">
-            <div className="section-copy">
-              <SectionHeading
+        <motion.section className={sectionClass} {...sectionMotionProps} id="workflow">
+          <div className={containerClass}>
+            <div className="grid gap-10 lg:grid-cols-[1fr_0.95fr] lg:items-start">
+              <div className="space-y-8">
+                <SectionHeading
                   eyebrow="Comment ça marche"
                   title="Un parcours simple qui rend le produit évident en quelques secondes"
                   description="L’expérience guide le visiteur de la configuration au résultat sans friction inutile."
-              />
+                />
 
-              <motion.div className="step-list" {...containerMotionProps}>
-                {workflowSteps.map((step, index) => {
-                  const StepIcon = step.icon
+                <motion.div className="space-y-4" {...containerMotionProps}>
+                  {workflowSteps.map((step, index) => {
+                    const StepIcon = step.icon
 
-                  return (
-                    <motion.article
-                      key={step.title}
-                      className="step-card"
-                      variants={itemVariants}
-                      whileHover={hoverLift}
-                    >
-                      <div className="step-card__number" aria-hidden="true">
-                        {String(index + 1).padStart(2, '0')}
-                      </div>
-                      <div className="step-card__body">
-                        <div className="step-card__title-row">
-                          <StepIcon size={18} />
-                          <span>{step.note}</span>
+                    return (
+                      <motion.article
+                        key={step.title}
+                        className="flex gap-4 rounded-[22px] border border-flowsync-border/70 bg-flowsync-surface/80 p-5 shadow-sm transition duration-300 hover:-translate-y-1 dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/75"
+                        variants={itemVariants}
+                        whileHover={hoverLift}
+                      >
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-flowsync-accent text-sm font-bold text-white shadow-[0_16px_34px_rgba(69,123,157,0.22)]">
+                          {String(index + 1).padStart(2, '0')}
                         </div>
-                        <h3>{step.title}</h3>
-                        <p>{step.description}</p>
-                      </div>
-                    </motion.article>
-                  )
-                })}
-              </motion.div>
-            </div>
-
-            <motion.aside className="workflow-panel" variants={sectionVariants}>
-              <div className="workflow-panel__top">
-                <div>
-                  <span className="dashboard-label">Sprint en direct</span>
-                  <h3>Un seul flux, une seule source de vérité</h3>
-                </div>
-                <span className="workflow-panel__tag">
-                  <TimerReset size={14} />
-                  3 tâches actives
-                </span>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                            <StepIcon size={18} className="text-flowsync-accent" />
+                            <span>{step.note}</span>
+                          </div>
+                          <h3 className="font-display text-xl font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                            {step.title}
+                          </h3>
+                          <p className="text-sm leading-7 text-flowsync-text/72 dark:text-flowsync-text-dark/72">
+                            {step.description}
+                          </p>
+                        </div>
+                      </motion.article>
+                    )
+                  })}
+                </motion.div>
               </div>
 
-              <div className="workflow-panel__timeline">
-                {workflowSteps.map((step, index) => {
-                  const StepIcon = step.icon
+              <motion.aside className={`${surfaceClass} p-6`} variants={sectionVariants}>
+                <div className="flex items-start justify-between gap-4 border-b border-flowsync-border/20 pb-5 dark:border-flowsync-border-dark/20">
+                  <div>
+                    <span className="text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                      Sprint en direct
+                    </span>
+                    <h3 className="mt-2 font-display text-2xl font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                      Un seul flux, une seule source de vérité
+                    </h3>
+                  </div>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-flowsync-accent/10 px-3 py-2 text-xs font-semibold text-flowsync-accent dark:bg-white/10 dark:text-flowsync-text-dark">
+                    <TimerReset size={14} />
+                    3 tâches actives
+                  </span>
+                </div>
 
-                  return (
-                    <div key={step.title} className="workflow-panel__step">
-                      <div className="workflow-panel__step-marker" aria-hidden="true">
-                        <StepIcon size={16} />
-                      </div>
-                      <div>
-                        <div className="workflow-panel__step-header">
-                          <strong>{String(index + 1).padStart(2, '0')} {step.title}</strong>
-                          <span>{step.note}</span>
+                <div className="mt-6 space-y-4">
+                  {workflowSteps.map((step, index) => {
+                    const StepIcon = step.icon
+
+                    return (
+                      <div
+                        key={step.title}
+                        className="flex gap-4 rounded-2xl border border-flowsync-border/15 bg-flowsync-bg/50 p-4 dark:border-flowsync-border-dark/15 dark:bg-white/5"
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-flowsync-accent/10 text-flowsync-accent dark:bg-white/10 dark:text-flowsync-text-dark">
+                          <StepIcon size={16} />
                         </div>
-                        <p>{step.description}</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-4">
+                            <strong className="text-sm text-flowsync-text dark:text-flowsync-text-dark">
+                              {String(index + 1).padStart(2, '0')} {step.title}
+                            </strong>
+                            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-flowsync-text/55 dark:text-flowsync-text-dark/55">
+                              {step.note}
+                            </span>
+                          </div>
+                          <p className="text-sm leading-6 text-flowsync-text/70 dark:text-flowsync-text-dark/70">
+                            {step.description}
+                          </p>
+                        </div>
                       </div>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-6 rounded-[24px] border border-flowsync-border/15 bg-flowsync-bg/50 p-5 dark:border-flowsync-border-dark/15 dark:bg-white/5">
+                  <div className="flex flex-wrap gap-3">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-flowsync-border/15 bg-flowsync-surface/90 px-3 py-2 text-xs font-semibold text-flowsync-text dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/80 dark:text-flowsync-text-dark">
+                      <BrainCircuit size={14} />
+                      Routage intelligent
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-flowsync-border/15 bg-flowsync-surface/90 px-3 py-2 text-xs font-semibold text-flowsync-text dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/80 dark:text-flowsync-text-dark">
+                      <CalendarDays size={14} />
+                      Cadence sprint
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-flowsync-border/15 bg-flowsync-surface/90 px-3 py-2 text-xs font-semibold text-flowsync-text dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/80 dark:text-flowsync-text-dark">
+                      <MessageSquareText size={14} />
+                      Moins de relances
+                    </span>
+                  </div>
+
+                  <div className="mt-5 space-y-3">
+                    <div className="flex items-center justify-between gap-4 text-sm">
+                      <span className="text-flowsync-text/70 dark:text-flowsync-text-dark/70">Momentum de livraison actuel</span>
+                      <strong className="text-flowsync-text dark:text-flowsync-text-dark">76%</strong>
                     </div>
-                  )
-                })}
-              </div>
-
-              <div className="workflow-panel__summary">
-                <div className="workflow-panel__chips">
-                  <span className="chip">
-                    <BrainCircuit size={14} />
-                    Routage intelligent
-                  </span>
-                  <span className="chip">
-                    <CalendarDays size={14} />
-                    Cadence sprint
-                  </span>
-                  <span className="chip">
-                    <MessageSquareText size={14} />
-                    Moins de relances
-                  </span>
-                </div>
-
-                <div className="workflow-panel__progress">
-                  <div className="workflow-panel__progress-head">
-                    <span>Momentum de livraison actuel</span>
-                    <strong>76%</strong>
-                  </div>
-                  <div className="progress-bar" aria-hidden="true">
-                    <span />
+                    <div className="h-2 rounded-full bg-flowsync-accent/15 dark:bg-white/10" aria-hidden="true">
+                      <span className="block h-2 w-[76%] rounded-full bg-flowsync-accent" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.aside>
+              </motion.aside>
+            </div>
           </div>
         </motion.section>
 
-        <motion.section className="section" {...sectionMotionProps} id="preview">
-          <div className="container">
+        <motion.section className={sectionClass} {...sectionMotionProps} id="preview">
+          <div className={containerClass}>
             <SectionHeading
               eyebrow="Aperçu du dashboard"
               title="Une démonstration visuelle qui semble réelle au premier regard"
@@ -639,78 +767,110 @@ export function FlowSyncLanding() {
               align="center"
             />
 
-            <motion.div className="dashboard-preview" variants={sectionVariants}>
-              <div className="dashboard-preview__shell">
-                <aside className="dashboard-preview__sidebar">
-                  <span className="dashboard-label">Projets</span>
-                  <div className="dashboard-preview__projects">
+            <motion.div className={`${surfaceClass} mt-12 overflow-hidden p-4 lg:p-6`} variants={sectionVariants}>
+              <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)_260px]">
+                <aside className="rounded-[22px] border border-flowsync-border/15 bg-flowsync-bg/55 p-5 dark:border-flowsync-border-dark/15 dark:bg-white/5">
+                  <span className="text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                    Projets
+                  </span>
+                  <div className="mt-4 space-y-3">
                     {projects.map((project, index) => (
                       <div
                         key={project.name}
-                        className={`dashboard-project ${index === 0 ? 'dashboard-project--active' : ''}`}
+                        className={`rounded-2xl border px-4 py-3 transition ${
+                          index === 0
+                            ? 'border-flowsync-accent/30 bg-flowsync-accent/10 dark:border-flowsync-accent-soft/30 dark:bg-white/10'
+                            : 'border-flowsync-border/15 bg-flowsync-surface/80 dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/75'
+                        }`}
                       >
-                        <div className="dashboard-project__meta">
-                          <strong>{project.name}</strong>
-                          <span>{project.status}</span>
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <strong className="block text-sm text-flowsync-text dark:text-flowsync-text-dark">
+                              {project.name}
+                            </strong>
+                            <span className="mt-1 block text-xs text-flowsync-text/65 dark:text-flowsync-text-dark/65">
+                              {project.status}
+                            </span>
+                          </div>
+                          <div className="rounded-full bg-flowsync-surface px-3 py-1 text-xs font-semibold text-flowsync-text shadow-sm dark:bg-flowsync-bg-dark dark:text-flowsync-text-dark">
+                            {project.progress}
+                          </div>
                         </div>
-                        <div className="dashboard-project__badge">{project.progress}</div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="dashboard-preview__note">
-                    <MonitorSmartphone size={16} />
-                    Mise en page mobile-first et interactions rapides sur tous les appareils.
+                  <div className="mt-4 flex items-start gap-3 rounded-2xl border border-flowsync-border/15 bg-flowsync-surface/80 p-4 text-sm leading-6 text-flowsync-text/72 dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/75 dark:text-flowsync-text-dark/72">
+                    <MonitorSmartphone size={16} className="mt-0.5 shrink-0 text-flowsync-accent" />
+                    <span>Mise en page mobile-first et interactions rapides sur tous les appareils.</span>
                   </div>
                 </aside>
 
-                <div className="dashboard-preview__main">
-                  <div className="dashboard-preview__bar">
+                <div className="rounded-[22px] border border-flowsync-border/15 bg-flowsync-bg/40 p-5 dark:border-flowsync-border-dark/15 dark:bg-white/5">
+                  <div className="flex items-start justify-between gap-4">
                     <div>
-                      <span className="dashboard-label">Vue globale</span>
-                      <h3>Lancez avec confiance</h3>
+                      <span className="text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                        Vue globale
+                      </span>
+                      <h3 className="mt-2 font-display text-2xl font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                        Lancez avec confiance
+                      </h3>
                     </div>
-                    <span className="dashboard-preview__tag">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-flowsync-accent/10 px-3 py-2 text-xs font-semibold text-flowsync-accent dark:bg-white/10 dark:text-flowsync-text-dark">
                       <CircleGauge size={14} />
                       En direct
                     </span>
                   </div>
 
-                  <div className="dashboard-preview__chart" aria-hidden="true">
+                  <div className="mt-6 flex h-60 items-end gap-3 rounded-[20px] border border-flowsync-border/15 bg-flowsync-surface/80 px-5 py-5 dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/80">
                     {chartBars.map((bar, index) => (
-                      <div key={index} className="chart-column">
-                        <div className="chart-column__track">
-                          <span className="chart-column__fill" style={{ height: `${bar}%` }} />
+                      <div key={index} className="flex flex-1 flex-col items-center gap-3">
+                        <div className="flex h-full w-full items-end rounded-full bg-flowsync-bg/70 px-1 dark:bg-white/5">
+                          <span
+                            className="block w-full rounded-full bg-flowsync-accent transition-all duration-300"
+                            style={{ height: `${bar}%` }}
+                          />
                         </div>
-                        <span>{['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'][index]}</span>
+                        <span className="text-xs font-medium text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                          {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'][index]}
+                        </span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="dashboard-preview__cards">
-                    <div className="dashboard-mini-card">
-                      <strong>Gain de vélocité</strong>
-                      <p>Des responsabilités claires et moins de blocages gardent l’équipe en mouvement.</p>
-                      <div className="dashboard-mini-card__stats">
-                        <span className="chip chip--compact">
+                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-[20px] border border-flowsync-border/15 bg-flowsync-surface/80 p-4 dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/75">
+                      <strong className="block text-sm text-flowsync-text dark:text-flowsync-text-dark">
+                        Gain de vélocité
+                      </strong>
+                      <p className="mt-2 text-sm leading-6 text-flowsync-text/72 dark:text-flowsync-text-dark/72">
+                        Des responsabilités claires et moins de blocages gardent l’équipe en mouvement.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-flowsync-border/15 bg-flowsync-bg/80 px-3 py-2 text-xs font-semibold text-flowsync-text dark:border-flowsync-border-dark/15 dark:bg-white/5 dark:text-flowsync-text-dark">
                           <TrendingUpIcon />
                           +18%
                         </span>
-                        <span className="chip chip--compact">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-flowsync-border/15 bg-flowsync-bg/80 px-3 py-2 text-xs font-semibold text-flowsync-text dark:border-flowsync-border-dark/15 dark:bg-white/5 dark:text-flowsync-text-dark">
                           <Layers3 size={14} />
                           4 flux actifs
                         </span>
                       </div>
                     </div>
-                    <div className="dashboard-mini-card">
-                      <strong>Cycle de revue</strong>
-                      <p>Le feedback arrive plus vite quand l’avancement est visible au même endroit.</p>
-                      <div className="dashboard-mini-card__stats">
-                        <span className="chip chip--compact">
+
+                    <div className="rounded-[20px] border border-flowsync-border/15 bg-flowsync-surface/80 p-4 dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/75">
+                      <strong className="block text-sm text-flowsync-text dark:text-flowsync-text-dark">
+                        Cycle de revue
+                      </strong>
+                      <p className="mt-2 text-sm leading-6 text-flowsync-text/72 dark:text-flowsync-text-dark/72">
+                        Le feedback arrive plus vite quand l’avancement est visible au même endroit.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-flowsync-border/15 bg-flowsync-bg/80 px-3 py-2 text-xs font-semibold text-flowsync-text dark:border-flowsync-border-dark/15 dark:bg-white/5 dark:text-flowsync-text-dark">
                           <CheckCircle2 size={14} />
                           12 terminées
                         </span>
-                        <span className="chip chip--compact">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-flowsync-border/15 bg-flowsync-bg/80 px-3 py-2 text-xs font-semibold text-flowsync-text dark:border-flowsync-border-dark/15 dark:bg-white/5 dark:text-flowsync-text-dark">
                           <TimerReset size={14} />
                           3 en attente
                         </span>
@@ -719,22 +879,38 @@ export function FlowSyncLanding() {
                   </div>
                 </div>
 
-                <aside className="dashboard-preview__insights">
-                  <div className="insight-card">
-                    <span className="dashboard-label">Performance</span>
-                    <strong className="insight-card__score">98</strong>
-                    <p>Une structure prête pour Lighthouse, avec des visuels sobres et des mouvements subtils.</p>
-                    <div className="insight-card__metrics">
-                      <span>LCP 1.2s</span>
-                      <span>CLS 0.01</span>
-                      <span>TTI rapide</span>
+                <aside className="space-y-4 rounded-[22px] border border-flowsync-border/15 bg-flowsync-bg/50 p-5 dark:border-flowsync-border-dark/15 dark:bg-white/5">
+                  <div className="rounded-[22px] border border-flowsync-border/15 bg-flowsync-surface/80 p-5 dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/75">
+                    <span className="text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                      Performance
+                    </span>
+                    <strong className="mt-3 block text-5xl font-display font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                      98
+                    </strong>
+                    <p className="mt-3 text-sm leading-6 text-flowsync-text/72 dark:text-flowsync-text-dark/72">
+                      Une structure prête pour Lighthouse, avec des visuels sobres et des mouvements subtils.
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-flowsync-text/65 dark:text-flowsync-text-dark/65">
+                      <span className="rounded-full border border-flowsync-border/15 bg-flowsync-bg/80 px-3 py-2 dark:border-flowsync-border-dark/15 dark:bg-white/5">
+                        LCP 1.2s
+                      </span>
+                      <span className="rounded-full border border-flowsync-border/15 bg-flowsync-bg/80 px-3 py-2 dark:border-flowsync-border-dark/15 dark:bg-white/5">
+                        CLS 0.01
+                      </span>
+                      <span className="rounded-full border border-flowsync-border/15 bg-flowsync-bg/80 px-3 py-2 dark:border-flowsync-border-dark/15 dark:bg-white/5">
+                        TTI rapide
+                      </span>
                     </div>
                   </div>
 
-                  <div className="insight-card insight-card--secondary">
-                    <span className="dashboard-label">Signal équipe</span>
-                    <h4>Tout se lit d’un coup d’œil</h4>
-                    <p>
+                  <div className="rounded-[22px] border border-flowsync-border/15 bg-flowsync-surface/80 p-5 dark:border-flowsync-border-dark/15 dark:bg-flowsync-surface-dark/75">
+                    <span className="text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                      Signal équipe
+                    </span>
+                    <h4 className="mt-3 font-display text-xl font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                      Tout se lit d’un coup d’œil
+                    </h4>
+                    <p className="mt-3 text-sm leading-6 text-flowsync-text/72 dark:text-flowsync-text-dark/72">
                       Des surfaces calmes, une hiérarchie forte et une révélation progressive rendent le produit
                       immédiatement compréhensible.
                     </p>
@@ -745,8 +921,8 @@ export function FlowSyncLanding() {
           </div>
         </motion.section>
 
-        <motion.section className="section" {...sectionMotionProps} id="pricing">
-          <div className="container">
+        <motion.section className={sectionClass} {...sectionMotionProps} id="pricing">
+          <div className={containerClass}>
             <SectionHeading
               eyebrow="Tarifs"
               title="Des offres simples qui cadrent clairement la conversion"
@@ -754,43 +930,61 @@ export function FlowSyncLanding() {
               align="center"
             />
 
-            <motion.div className="pricing-grid" {...containerMotionProps}>
+            <motion.div className="mt-12 grid gap-6 lg:grid-cols-3" {...containerMotionProps}>
               {pricingPlans.map((plan) => (
                 <motion.article
                   key={plan.name}
-                  className={`pricing-card ${plan.highlighted ? 'pricing-card--featured' : ''}`}
+                  className={`flex h-full flex-col rounded-[28px] border p-6 shadow-sm transition duration-300 ${
+                    plan.highlighted
+                      ? 'border-flowsync-accent/40 bg-flowsync-accent/8 ring-1 ring-flowsync-accent/20 lg:scale-[1.02]'
+                      : 'border-flowsync-border/70 bg-flowsync-surface/85 dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/80'
+                  }`}
                   variants={itemVariants}
                   whileHover={hoverLift}
                   transition={{ duration: reduceMotion ? 0 : 0.25, ease: easeOut }}
                 >
-                  <div className="pricing-card__header">
-                    <span className="pricing-card__eyebrow">{plan.name}</span>
-                    {plan.badge && <span className="pricing-card__badge">{plan.badge}</span>}
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                      {plan.name}
+                    </span>
+                    {plan.badge && (
+                      <span className="rounded-full bg-flowsync-accent/10 px-3 py-1 text-xs font-semibold text-flowsync-accent dark:bg-white/10 dark:text-flowsync-text-dark">
+                        {plan.badge}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="pricing-card__price">
+                  <div className="mt-6 flex items-end gap-2">
                     {plan.price === 'Custom' ? (
-                      <strong>{plan.price}</strong>
+                      <strong className="font-display text-4xl font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                        {plan.price}
+                      </strong>
                     ) : (
                       <>
-                        <strong>{plan.price}</strong>
-                        <span>{plan.period}</span>
+                        <strong className="font-display text-5xl font-bold text-flowsync-text dark:text-flowsync-text-dark">
+                          {plan.price}
+                        </strong>
+                        <span className="pb-1 text-sm text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                          {plan.period}
+                        </span>
                       </>
                     )}
                   </div>
 
-                  <p>{plan.description}</p>
+                  <p className="mt-4 text-sm leading-7 text-flowsync-text/72 dark:text-flowsync-text-dark/72">
+                    {plan.description}
+                  </p>
 
-                  <ul>
+                  <ul className="mt-6 space-y-3">
                     {plan.features.map((feature) => (
-                      <li key={feature}>
-                        <CheckCircle2 size={16} />
+                      <li key={feature} className="flex items-start gap-3 text-sm leading-6 text-flowsync-text/78 dark:text-flowsync-text-dark/78">
+                        <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-flowsync-accent" />
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <a className={`button ${plan.highlighted ? 'button--primary' : 'button--secondary'} pricing-card__cta`} href="#cta">
+                  <a className={`mt-8 ${plan.highlighted ? buttonPrimary : buttonSecondary} w-full`} href="#cta">
                     {plan.cta}
                   </a>
                 </motion.article>
@@ -799,8 +993,8 @@ export function FlowSyncLanding() {
           </div>
         </motion.section>
 
-        <motion.section className="section" {...sectionMotionProps} id="testimonials">
-          <div className="container">
+        <motion.section className={sectionClass} {...sectionMotionProps} id="testimonials">
+          <div className={containerClass}>
             <SectionHeading
               eyebrow="Avis clients"
               title="Une couche de crédibilité qui soutient le discours commercial"
@@ -808,28 +1002,34 @@ export function FlowSyncLanding() {
               align="center"
             />
 
-            <motion.div className="testimonial-grid" {...containerMotionProps}>
+            <motion.div className="mt-12 grid gap-6 lg:grid-cols-3" {...containerMotionProps}>
               {testimonials.map((testimonial) => (
                 <motion.article
                   key={testimonial.name}
-                  className="testimonial-card"
+                  className="rounded-[24px] border border-flowsync-border/70 bg-flowsync-surface/85 p-6 shadow-sm transition duration-300 hover:-translate-y-1 dark:border-flowsync-border-dark/60 dark:bg-flowsync-surface-dark/80"
                   variants={itemVariants}
                   whileHover={hoverLift}
                   transition={{ duration: reduceMotion ? 0 : 0.25, ease: easeOut }}
                 >
-                  <div className="testimonial-card__stars" aria-hidden="true">
+                  <div className="flex items-center gap-1 text-flowsync-accent" aria-hidden="true">
                     {Array.from({ length: 5 }).map((_, index) => (
                       <Star key={index} size={14} fill="currentColor" />
                     ))}
                   </div>
 
-                  <p className="testimonial-card__quote">“{testimonial.quote}”</p>
+                  <p className="mt-5 text-base leading-8 text-flowsync-text/75 dark:text-flowsync-text-dark/75">
+                    “{testimonial.quote}”
+                  </p>
 
-                  <div className="testimonial-card__author">
-                    <span className="testimonial-avatar">{testimonial.initials}</span>
+                  <div className="mt-6 flex items-center gap-4">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-flowsync-accent text-sm font-bold text-white shadow-[0_16px_34px_rgba(69,123,157,0.22)]">
+                      {testimonial.initials}
+                    </span>
                     <div>
-                      <strong>{testimonial.name}</strong>
-                      <span>
+                      <strong className="block text-sm text-flowsync-text dark:text-flowsync-text-dark">
+                        {testimonial.name}
+                      </strong>
+                      <span className="mt-1 block text-sm text-flowsync-text/60 dark:text-flowsync-text-dark/60">
                         {testimonial.role} · {testimonial.company}
                       </span>
                     </div>
@@ -840,87 +1040,125 @@ export function FlowSyncLanding() {
           </div>
         </motion.section>
 
-        <section className="section section--cta" id="cta">
-          <div className="container">
+        <section className={`${sectionClass} pt-0`} id="cta">
+          <div className={containerClass}>
             <motion.div
-              className="cta-panel"
+              className="relative overflow-hidden rounded-[32px] border border-flowsync-border/20 bg-flowsync-text px-6 py-10 text-white shadow-[0_30px_80px_rgba(29,53,87,0.30)] dark:border-flowsync-border-dark/40 dark:bg-flowsync-surface-dark dark:text-flowsync-text-dark"
               initial={reduceMotion ? false : { opacity: 0, y: 24 }}
               whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={viewport}
               transition={{ duration: reduceMotion ? 0 : 0.7, ease: easeOut }}
             >
-              <div className="cta-panel__copy">
-                <span className="eyebrow eyebrow--light">Prêt à lancer ?</span>
-                <h2>Transformez le chaos projet en élan concret.</h2>
-                <p>
-                  Offrez à votre équipe un espace unique pour planifier, suivre et livrer en temps réel, avec une
-                  narration produit premium dès le premier scroll.
-                </p>
-              </div>
+              <span className="absolute right-0 top-0 h-40 w-40 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
+              <span className="absolute bottom-0 left-0 h-56 w-56 rounded-full bg-flowsync-accent-soft/15 blur-3xl" aria-hidden="true" />
 
-              <div className="cta-panel__actions">
-                <a className="button button--primary button--large" href="#pricing">
-                  Essai gratuit <ArrowRight size={18} />
-                </a>
-                <a className="button button--secondary button--large" href="#features">
-                  Explorer les fonctionnalités
-                </a>
+              <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+                <div className="space-y-5">
+                  <span className={eyebrowLightClass}>Prêt à lancer ?</span>
+                  <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl dark:text-flowsync-text-dark">
+                    Transformez le chaos projet en élan concret.
+                  </h2>
+                  <p className="max-w-2xl text-base leading-8 text-white/80 dark:text-flowsync-text-dark/80">
+                    Offrez à votre équipe un espace unique pour planifier, suivre et livrer en temps réel, avec une
+                    narration produit premium dès le premier scroll.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                  <a className={buttonInverted} href="#pricing">
+                    Essai gratuit <ArrowRight size={18} />
+                  </a>
+                  <a className={buttonOnDark} href="#features">
+                    Explorer les fonctionnalités
+                  </a>
+                </div>
               </div>
             </motion.div>
           </div>
         </section>
       </main>
 
-      <footer className="site-footer">
-        <div className="container footer-grid">
-          <div className="footer-brand">
-            <div className="brand footer-brand__identity">
-              <span className="brand-mark" aria-hidden="true">
-                <Sparkles size={16} />
-              </span>
-              <span className="brand-copy">
-                <strong>FlowSync</strong>
-                <small>Gestion de projets en temps réel</small>
-              </span>
-            </div>
-            <p>
-              Un concept de landing page SaaS centré sur la clarté, la conversion, la performance et le langage visuel
-              d’une startup produit moderne.
-            </p>
-            <div className="footer-pills" aria-label="Points forts du projet">
-              <span className="footer-pill">Mode sombre</span>
-              <span className="footer-pill">SEO prêt</span>
-              <span className="footer-pill">Accessibilité</span>
-              <span className="footer-pill">Chargement rapide</span>
-            </div>
-          </div>
+      <footer className="border-t border-flowsync-border/30 py-14 dark:border-flowsync-border-dark/30">
+        <div className={containerClass}>
+          <div className="grid gap-10 lg:grid-cols-[1.4fr_0.8fr_0.8fr]">
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-flowsync-accent text-white shadow-[0_18px_40px_rgba(69,123,157,0.28)]">
+                  <Sparkles size={16} />
+                </span>
+                <div>
+                  <strong className="block font-display text-lg text-flowsync-text dark:text-flowsync-text-dark">
+                    FlowSync
+                  </strong>
+                  <span className="block text-xs font-medium uppercase tracking-[0.24em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                    Gestion de projets en temps réel
+                  </span>
+                </div>
+              </div>
 
-          <div>
-            <span className="footer-title">Produit</span>
-            <div className="footer-links">
-              {footerLinks.map((link) => (
-                <a key={link.href} href={link.href}>
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          </div>
+              <p className="max-w-xl text-sm leading-7 text-flowsync-text/72 dark:text-flowsync-text-dark/72">
+                Un concept de landing page SaaS centré sur la clarté, la conversion, la performance et le langage
+                visuel d’une startup produit moderne.
+              </p>
 
-          <div>
-            <span className="footer-title">Ressources</span>
-            <div className="footer-links">
-              {supportLinks.map((link) => (
-                <a key={link.href} href={link.href}>
-                  {link.label}
-                </a>
-              ))}
+              <div className="flex flex-wrap gap-3" aria-label="Points forts du projet">
+                {['Mode clair / sombre', 'SEO prêt', 'Accessibilité', 'Chargement rapide'].map((label) => (
+                  <span
+                    key={label}
+                    className="rounded-full border border-flowsync-border/20 bg-flowsync-surface/80 px-3 py-2 text-xs font-semibold text-flowsync-text dark:border-flowsync-border-dark/20 dark:bg-flowsync-surface-dark/75 dark:text-flowsync-text-dark"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="footer-socials" aria-label="Social links">
-              {socialLinks.map((link) => (
-                <a key={link.label} href={link.href} target="_blank" rel="noreferrer">
-                  {link.label}
-                </a>
-              ))}
+
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                Produit
+              </span>
+              <div className="mt-4 space-y-3">
+                {footerLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    className="block text-sm text-flowsync-text/75 transition hover:text-flowsync-accent dark:text-flowsync-text-dark/75 dark:hover:text-flowsync-accent-soft"
+                    href={link.href}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-flowsync-text/60 dark:text-flowsync-text-dark/60">
+                Ressources
+              </span>
+              <div className="mt-4 space-y-3">
+                {supportLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    className="block text-sm text-flowsync-text/75 transition hover:text-flowsync-accent dark:text-flowsync-text-dark/75 dark:hover:text-flowsync-accent-soft"
+                    href={link.href}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3" aria-label="Social links">
+                {socialLinks.map((link) => (
+                  <a
+                    key={link.label}
+                    className="rounded-full border border-flowsync-border/20 bg-flowsync-surface/80 px-3 py-2 text-sm font-medium text-flowsync-text transition hover:border-flowsync-accent/30 hover:text-flowsync-accent dark:border-flowsync-border-dark/20 dark:bg-flowsync-surface-dark/75 dark:text-flowsync-text-dark dark:hover:text-flowsync-accent-soft"
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </div>

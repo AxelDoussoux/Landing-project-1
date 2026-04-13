@@ -1,91 +1,86 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700;800&display=swap');
+@import 'tailwindcss';
 
-:root {
-  color-scheme: light;
-  --color-bg: #f1faee;
-  --color-surface: rgba(255, 255, 255, 0.88);
-  --color-surface-strong: rgba(255, 255, 255, 0.98);
-  --color-border-subtle: rgba(69, 123, 157, 0.12);
-  --color-border-default: rgba(69, 123, 157, 0.18);
-  --color-text-primary: #1d3557;
-  --color-text-secondary: rgba(29, 53, 87, 0.72);
-  --color-accent: #457b9d;
-  --color-accent-secondary: #a8dadc;
-  --color-accent-tertiary: #e63946;
-  --color-shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.18);
-  --color-shadow: 0 24px 60px rgba(0, 0, 0, 0.26);
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  --color-flowsync-bg: #f1faee;
+  --color-flowsync-bg-dark: #08111d;
+  --color-flowsync-surface: #ffffff;
+  --color-flowsync-surface-dark: #0f1b2d;
+  --color-flowsync-text: #1d3557;
+  --color-flowsync-text-dark: #f4f8ff;
+  --color-flowsync-text-muted: #5d718d;
+  --color-flowsync-text-muted-dark: #9eb0c5;
+  --color-flowsync-accent: #457b9d;
+  --color-flowsync-accent-soft: #a8dadc;
+  --color-flowsync-accent-strong: #e63946;
+  --color-flowsync-border: #457b9d;
 }
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-html {
-  min-height: 100%;
-  scroll-behavior: smooth;
-  background: var(--color-bg);
-}
+  html {
+    @apply min-h-full scroll-smooth bg-flowsync-bg;
+  }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  overflow-x: hidden;
-  color: var(--color-text-primary);
-  background:
-    radial-gradient(circle at top, rgba(168, 218, 220, 0.45) 0%, rgba(241, 250, 238, 0.96) 38%, #f1faee 100%);
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.5;
-  font-weight: 400;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html.dark {
+    @apply bg-flowsync-bg-dark;
+  }
 
-body::selection {
-  background: rgba(34, 211, 238, 0.28);
-  color: white;
-}
+  body {
+    @apply min-w-[320px] overflow-x-hidden bg-flowsync-bg font-sans text-flowsync-text antialiased;
+    background-image: radial-gradient(circle at top, rgba(168, 218, 220, 0.45) 0%, rgba(241, 250, 238, 0.96) 38%, #f1faee 100%);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-::selection {
-  background: rgba(34, 211, 238, 0.28);
-  color: white;
-}
+  html.dark body {
+    @apply bg-flowsync-bg-dark text-flowsync-text-dark;
+    background-image: radial-gradient(circle at top, rgba(69, 123, 157, 0.22) 0%, rgba(8, 17, 29, 0.96) 42%, #08111d 100%);
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+  ::selection {
+    background: rgba(69, 123, 157, 0.28);
+    color: #ffffff;
+  }
 
-img {
-  max-width: 100%;
-  display: block;
-}
+  a {
+    @apply text-inherit no-underline;
+  }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
+  img {
+    @apply block max-w-full;
+  }
 
-button {
-  cursor: pointer;
-}
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
 
-code {
-  font-family: var(--font-mono);
-}
+  button {
+    cursor: pointer;
+  }
 
-:focus-visible {
-  outline: 2px solid rgba(34, 211, 238, 0.95);
-  outline-offset: 3px;
-}
+  code {
+    font-family: var(--font-mono);
+  }
 
-#root {
-  min-height: 100vh;
+  :focus-visible {
+    @apply outline-2 outline-offset-4 outline-flowsync-accent;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
 }
